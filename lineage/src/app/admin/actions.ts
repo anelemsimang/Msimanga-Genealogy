@@ -660,3 +660,72 @@ export async function deletePlaceAction(id: string): Promise<ActionResult> {
   revalidatePath("/admin/places");
   redirect("/admin/places");
 }
+
+// ---------------------------------------------------------------------------
+// Birth order (sibling / children sort_order)
+// ---------------------------------------------------------------------------
+
+/**
+ * Persist a new birth order for a set of siblings/children.
+ * `orderedIds` is eldest → youngest; sort_order becomes 10, 20, 30…
+ */
+export async function reorderPeopleAction(
+  parentId: string,
+  orderedIds: string[]
+): Promise<ActionResult> {
+  if (!(await isEditor())) {
+    return { ok: false, error: "You do not have permission to reorder people." };
+  }
+  if (!orderedIds.length) {
+    return { ok: false, error: "Nothing to reorder." };
+  }
+
+  const user = await getCurrentUser();
+  const supabase = await createClient();
+
+  // Verify every id is a child of this parent (father or mother).
+  const { data: rowsData, error: fetchError } = await supabase
+    .from("people")
+    .select("id, father_id, mother_id, slug")
+    .in("id", orderedIds);
+  if (fetchError) return { ok: false, error: fetchError.message };
+
+  const rows = (rowsData ?? []) as Pick<
+    PersonRow,
+    "id" | "father_id" | "mother_id" | "slug"
+  >[];
+  if (rows.length !== orderedIds.length) {
+    return { ok: false, error: "One or more people could not be found." };
+  }
+  for (const row of rows) {
+    if (row.father_id !== parentId && row.mother_id !== parentId) {
+      return {
+        ok: false,
+        error: "All people must be children of the person you are editing.",
+      };
+    }
+  }
+
+  // Gap numbering so future inserts can sit between later if needed.
+  for (let i = 0; i < orderedIds.length; i++) {
+    const { error } = await supabase
+      .from("people")
+      .update({
+        sort_order: (i + 1) * 10,
+        updated_by: user?.id ?? null,
+      })
+      .eq("id", orderedIds[i]);
+    if (error) return { ok: false, error: error.message };
+  }
+
+  revalidatePath("/");
+  revalidatePath("/search");
+  revalidatePath("/tree");
+  revalidatePath("/admin");
+  revalidatePath(`/admin/people/${parentId}/edit`);
+  for (const row of rows) {
+    revalidatePath(`/people/${row.slug}`);
+    revalidatePath(`/admin/people/${row.id}/edit`);
+  }
+  return { ok: true, id: parentId };
+}

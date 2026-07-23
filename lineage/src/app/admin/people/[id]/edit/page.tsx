@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
-import { getAllPeople, getPersonById } from "@/lib/people/service";
+import { getAllPeople, getPersonById, getChildren } from "@/lib/people/service";
 import { isAdmin } from "@/lib/auth/session";
 import { PersonForm } from "@/components/admin/person-form";
 import { AddGenerationAbove } from "@/components/admin/add-generation-above";
 import { AddSpouseProfile } from "@/components/admin/add-spouse-profile";
+import { ChildrenBirthOrder } from "@/components/admin/children-birth-order";
 
 export async function generateMetadata({
   params,
@@ -33,6 +34,8 @@ export default async function EditPersonPage({
     isAdmin(),
   ]);
   if (!person) notFound();
+
+  const children = await getChildren(person);
 
   const options = people
     .filter((p) => p.id !== person.id)
@@ -71,6 +74,19 @@ export default async function EditPersonPage({
         hasLinkedSpouse={Boolean(person.spouse_id)}
         defaultName={person.spouse}
         defaultGender={person.gender === "female" ? "male" : "female"}
+      />
+      <ChildrenBirthOrder
+        parentId={person.id}
+        parentName={person.full_name}
+        children={children.map((c) => ({
+          id: c.id,
+          slug: c.slug,
+          full_name: c.full_name,
+          gender: c.gender,
+          honorific: c.honorific,
+          imageUrl: c.imageUrl,
+          sort_order: c.sort_order,
+        }))}
       />
 
       <PersonForm

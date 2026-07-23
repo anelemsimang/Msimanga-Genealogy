@@ -55,6 +55,15 @@ export const getFamilyData = cache(async (): Promise<FamilyData> => {
     addChild(person.father_id, person);
     addChild(person.mother_id, person);
   }
+  for (const [parentId, list] of childrenByParent) {
+    list.sort(
+      (a, b) =>
+        (a.sort_order ?? Number.POSITIVE_INFINITY) -
+          (b.sort_order ?? Number.POSITIVE_INFINITY) ||
+        a.full_name.localeCompare(b.full_name)
+    );
+    childrenByParent.set(parentId, list);
+  }
 
   return { people, byId, bySlug, childrenByParent };
 });
@@ -78,7 +87,13 @@ export async function getPersonById(id: string): Promise<Person | undefined> {
 }
 
 export async function getChildren(person: Person): Promise<Person[]> {
-  return (await getFamilyData()).childrenByParent.get(person.id) ?? [];
+  const list = (await getFamilyData()).childrenByParent.get(person.id) ?? [];
+  return [...list].sort(
+    (a, b) =>
+      (a.sort_order ?? Number.POSITIVE_INFINITY) -
+        (b.sort_order ?? Number.POSITIVE_INFINITY) ||
+      a.full_name.localeCompare(b.full_name)
+  );
 }
 
 export async function getParents(
@@ -95,8 +110,14 @@ export async function getSiblings(person: Person): Promise<Person[]> {
   const { childrenByParent } = await getFamilyData();
   const parentId = person.father_id ?? person.mother_id;
   if (!parentId) return [];
-  return (childrenByParent.get(parentId) ?? []).filter(
+  const list = (childrenByParent.get(parentId) ?? []).filter(
     (p) => p.id !== person.id
+  );
+  return [...list].sort(
+    (a, b) =>
+      (a.sort_order ?? Number.POSITIVE_INFINITY) -
+        (b.sort_order ?? Number.POSITIVE_INFINITY) ||
+      a.full_name.localeCompare(b.full_name)
   );
 }
 
