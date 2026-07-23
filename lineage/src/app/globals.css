@@ -176,3 +176,25 @@ body {
 font[style] {
   vertical-align: inherit !important;
 }
+
+/* Branded route loader — soft orbiting arc around the tree mark */
+@keyframes brand-loader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.brand-loader-ring {
+  animation: brand-loader-spin 1.15s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-loader-ring {
+    animation: none;
+  }
+
+  .brand-loader-arc {
+    stroke-dasharray: 90 100;
+    opacity: 0.55;
+  }
+}
