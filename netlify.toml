@@ -1,8 +1,10 @@
-# App lives in /lineage — without this, Netlify builds the repo root and 404s.
+# Next.js app is in /lineage.
+# Do NOT set publish = "…" here or in the Netlify UI — the Next.js
+# runtime adapter handles that. A custom publish path uploads the source
+# folder as static files (0 functions) and the site 404s.
 [build]
   base = "lineage"
   command = "npm run build"
 
 [build.environment]
   NODE_VERSION = "22"
-  # Next.js OpenNext adapter is auto-injected by Netlify — do not pin unless needed.
