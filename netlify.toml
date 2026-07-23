@@ -1,9 +1,10 @@
 # Next.js app is in /lineage.
-# Explicit Next.js runtime — auto-detection was deploying .next as static
-# files with 0 serverless functions (site 404).
+# publish must differ from base — UI often defaults publish to the base folder,
+# which makes @netlify/plugin-nextjs fail.
 [build]
   base = "lineage"
   command = "npm run build"
+  publish = ".next"
 
 [build.environment]
   NODE_VERSION = "22"
