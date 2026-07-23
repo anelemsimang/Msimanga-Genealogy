@@ -1,10 +1,10 @@
 # Next.js app is in /lineage.
-# Do NOT set publish = "…" here or in the Netlify UI — the Next.js
-# runtime adapter handles that. A custom publish path uploads the source
-# folder as static files (0 functions) and the site 404s.
+# Publish must be ".next" (relative to base), NOT "lineage".
+# If the Netlify UI still shows publish = lineage, this file overrides it.
 [build]
   base = "lineage"
   command = "npm run build"
+  publish = ".next"
 
 [build.environment]
   NODE_VERSION = "22"
