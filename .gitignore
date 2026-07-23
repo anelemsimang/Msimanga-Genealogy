@@ -1,0 +1,17 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Secrets — never commit
+.env
+.env.*
+!.env*.example
+
+# Dependencies & build (also covered under lineage/.gitignore)
+node_modules/
+.next/
+out/
+build/
