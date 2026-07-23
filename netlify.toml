@@ -1,10 +1,12 @@
 # Next.js app is in /lineage.
-# Publish must be ".next" (relative to base), NOT "lineage".
-# If the Netlify UI still shows publish = lineage, this file overrides it.
+# Explicit Next.js runtime — auto-detection was deploying .next as static
+# files with 0 serverless functions (site 404).
 [build]
   base = "lineage"
   command = "npm run build"
-  publish = ".next"
 
 [build.environment]
   NODE_VERSION = "22"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
