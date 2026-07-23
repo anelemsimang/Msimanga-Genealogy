@@ -1,0 +1,8 @@
+# App lives in /lineage — without this, Netlify builds the repo root and 404s.
+[build]
+  base = "lineage"
+  command = "npm run build"
+
+[build.environment]
+  NODE_VERSION = "22"
+  # Next.js OpenNext adapter is auto-injected by Netlify — do not pin unless needed.
